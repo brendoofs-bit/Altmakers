@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Altmakers: Especialistas em Landing Pages de Alta Conversão. Transforme visitantes em clientes com estratégias baseadas em dados e design persuasivo.">
+    <meta name="theme-color" content="#020617">
+    
+    <title>Altmakers | Landing Pages de Alta Performance</title>
+
+    <!-- Favicon (SVG Base64 para performance e arquivo único) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23020617' rx='8'/%3E%3Cpath d='M20 8L32 32H8L20 8Z' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='8' y1='32' x2='32' y2='8' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%2310b981'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E">
+
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#020617',
+                            primary: '#10b981', // Emerald 500
+                            secondary: '#06b6d4', // Cyan 500
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Import Map for Gemini SDK -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+      }
+    }
+    </script>
+
+    <style>
+        /* CSS Crítico Inline para evitar Layout Shift */
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(to right, #34d399, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(52, 211, 153, 0.3);
+            box-shadow: 0 0 30px rgba(52, 211, 153, 0.1);
+            transform: translateY(-2px);
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(circle at top, #0f172a 0%, #020617 60%, #000000 100%);
+        }
+
+        /* Utility classes for selection */
+        ::selection {
+            background: rgba(16, 185, 129, 0.3);
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 transition-all duration-300 py-6" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <div class="relative w-10 h-10 flex items-center justify-center bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-lg transform rotate-3 hover:rotate-6 transition-transform shadow-lg shadow-emerald-500/20">
+                    <span class="font-bold text-slate-950 text-2xl font-display">A</span>
+                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-xl tracking-tight text-white leading-none font-display">ALTMAKERS</span>
+                    <span class="text-[10px] text-emerald-400 tracking-[0.2em] font-medium uppercase mt-1">Studio Digital</span>
+                </div>
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-8 bg-slate-950/50 px-6 py-2 rounded-full border border-slate-800 backdrop-blur-md">
+                <a href="#hero" class="text-slate-300 hover:text-white text-sm font-medium transition-colors hover:text-emerald-400">Landing Page</a>
+                <a href="#micro-saas" class="text-slate-300 hover:text-white text-sm font-medium transition-colors hover:text-emerald-400">Micro SaaS</a>
+                <a href="#tracking" class="text-slate-300 hover:text-white text-sm font-medium transition-colors hover:text-emerald-400">Tracking</a>
+            </div>
+
+            <!-- CTA Mobile/Desktop -->
+            <a href="https://wa.me/5527999610392?text=Olá, gostaria de escalar minhas conversões." 
+               target="_blank" 
+               class="hidden md:inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-semibold bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                Falar Agora
+            </a>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-white p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-slate-950 border-b border-slate-800 p-6 flex flex-col gap-4 shadow-2xl">
+            <a href="#hero" class="text-slate-300 hover:text-emerald-400 py-2">Landing Page</a>
+            <a href="#micro-saas" class="text-slate-300 hover:text-emerald-400 py-2">Micro SaaS</a>
+            <a href="#tracking" class="text-slate-300 hover:text-emerald-400 py-2">Tracking</a>
+            <a href="https://wa.me/5527999610392" class="w-full text-center bg-emerald-500 text-white py-3 rounded-lg font-bold">Falar no WhatsApp</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="relative pt-36 pb-20 px-6">
+            <div class="max-w-5xl mx-auto text-center relative z-10">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-emerald-500/30 text-sm text-emerald-400 mb-8 backdrop-blur-sm animate-fade-in-up">
+                    <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-semibold tracking-wide uppercase text-xs">Especialistas em Conversão</span>
+                </div>
+
+                <h1 class="text-5xl md:text-7xl font-bold leading-tight mb-8 text-white tracking-tight animate-fade-in-up" style="animation-delay: 0.1s;">
+                    Transforme Tráfego em <br />
+                    <span class="gradient-text">Receita Previsível.</span>
+                </h1>
+                
+                <p class="text-xl text-slate-400 mb-10 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style="animation-delay: 0.2s;">
+                    Não entregamos apenas "sites". Entregamos <strong>Máquinas de Vendas</strong>. Landing Pages projetadas com psicologia de consumo, design persuasivo e velocidade extrema para multiplicar seu ROI.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up" style="animation-delay: 0.3s;">
+                    <a href="https://wa.me/5527999610392?text=Olá, quero uma análise da minha estrutura." 
+                       target="_blank"
+                       class="w-full sm:w-auto text-lg px-10 py-4 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-bold shadow-xl shadow-emerald-500/20 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                        Solicitar Orçamento
+                    </a>
+                    <a href="#portfolio" class="w-full sm:w-auto text-white hover:text-emerald-400 flex items-center justify-center gap-2 px-8 py-4 transition-colors font-medium border border-slate-700 hover:border-emerald-500/50 rounded-xl bg-slate-900/50 backdrop-blur-sm">
+                        Ver Portfólio <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                </div>
+
+                <!-- Stats Strip -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto border-t border-slate-800 pt-8 animate-fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="p-4">
+                        <div class="text-3xl font-bold text-white font-display">2s</div>
+                        <div class="text-xs text-slate-500 uppercase tracking-widest mt-1">Carregamento Médio</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="text-3xl font-bold text-emerald-400 font-display">+340%</div>
+                        <div class="text-xs text-slate-500 uppercase tracking-widest mt-1">Aumento de Conversão</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="text-3xl font-bold text-white font-display">500+</div>
+                        <div class="text-xs text-slate-500 uppercase tracking-widest mt-1">Projetos Entregues</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="text-3xl font-bold text-white font-display">24h</div>
+                        <div class="text-xs text-slate-500 uppercase tracking-widest mt-1">Suporte Dedicado</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive AI Strategy Generator -->
+        <section id="ai-strategy" class="py-24 px-6 bg-slate-900/50 border-y border-slate-800 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 blur-[100px] rounded-full pointer-events-none"></div>
+            
+            <div class="max-w-4xl mx-auto relative z-10">
+                <header class="text-center mb-10">
+                    <div class="inline-flex items-center gap-2 text-emerald-400 font-semibold mb-3 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 text-xs uppercase tracking-wide">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                        Powered by Gemini 3
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">
+                        Descubra o Potencial da sua LP
+                    </h2>
+                    <p class="text-slate-400 max-w-2xl mx-auto text-lg">
+                        Digite seu nicho ou produto abaixo. Nossa IA irá gerar instantaneamente uma estrutura de Landing Page validada e uma estimativa de conversão.
+                    </p>
+                </header>
+
+                <div class="glass-card p-6 md:p-10 rounded-2xl shadow-2xl">
+                    <form id="gemini-form" class="flex flex-col sm:flex-row gap-4 mb-8">
+                        <div class="flex-1">
+                            <input
+                                type="text"
+                                id="niche-input"
+                                placeholder="Ex: Dentista, Venda de Curso de Inglês, SaaS B2B..."
+                                class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-5 py-4 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all placeholder:text-slate-600 text-lg"
+                                required
+                            />
+                        </div>
+                        <button 
+                            type="submit" 
+                            id="gemini-btn"
+                            class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 min-w-[180px] text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <span id="btn-text">Gerar Estratégia</span>
+                            <svg id="btn-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </form>
+
+                    <!-- Results Container -->
+                    <div id="ai-results" class="hidden space-y-6 animate-fade-in-up">
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                            <h3 class="text-emerald-400 text-sm font-bold uppercase tracking-wider mb-2">Estrutura Recomendada</h3>
+                            <h4 id="result-title" class="text-xl font-bold text-white mb-3"></h4>
+                            <p id="result-desc" class="text-slate-300 leading-relaxed"></p>
+                        </div>
+                        
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="flex-1 bg-slate-800/50 p-5 rounded-xl border border-slate-700 flex items-center gap-4">
+                                <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-slate-500 uppercase font-bold">Conversão Estimada</div>
+                                    <div id="result-rate" class="text-xl font-bold text-white"></div>
+                                </div>
+                            </div>
+                            
+                            <a href="https://wa.me/5527999610392?text=Gostei da estratégia gerada pela IA e quero aplicar." 
+                               target="_blank"
+                               class="flex-1 bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/30 p-5 rounded-xl flex items-center justify-between group transition-colors cursor-pointer text-decoration-none">
+                                <div>
+                                    <div class="text-emerald-400 font-bold group-hover:text-emerald-300">Quero aplicar essa estratégia</div>
+                                    <div class="text-xs text-slate-400">Falar com especialista humano</div>
+                                </div>
+                                <svg class="text-emerald-500 group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div id="ai-loading" class="hidden py-8 text-center">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 mb-4"></div>
+                        <p class="text-slate-400 text-sm animate-pulse">A IA está analisando milhões de dados de conversão...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Problem Awareness -->
+        <section class="py-20 px-6">
+            <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <div class="inline-block bg-red-500/10 text-red-400 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">O Problema</div>
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 text-white">
+                        Sua Empresa Está <span class="text-red-500">Perdendo Dinheiro</span> Agora Mesmo.
+                    </h2>
+                    <p class="text-slate-400 text-lg leading-relaxed">
+                        96% das pessoas que visitam seu site vão embora sem comprar. Elas escapam porque você não tem uma estrutura persuasiva.
+                    </p>
+                    <ul class="space-y-4 pt-4">
+                        <li class="flex items-center gap-3 text-slate-300">
+                            <svg class="text-red-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                            <span>Tráfego pago caro sem retorno (ROI negativo)</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-slate-300">
+                            <svg class="text-red-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                            <span>Site lento que perde o cliente em 3 segundos</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-slate-300">
+                            <svg class="text-red-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                            <span>Design amador que destrói sua autoridade</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-red-500">
+                        <div class="text-3xl font-bold text-white mb-1">R$ 0</div>
+                        <div class="text-sm text-slate-400">Retorno de um clique em site lento</div>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-emerald-500 bg-emerald-900/10">
+                        <div class="text-3xl font-bold text-white mb-1">+55%</div>
+                        <div class="text-sm text-slate-400">Faturamento com LP Otimizada</div>
+                    </div>
+                    <div class="col-span-2 glass-card p-8 rounded-2xl text-center">
+                        <p class="text-lg text-slate-300">
+                            Pare de usar "Link na Bio" genérico. Tenha uma máquina de vendas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfolio Grid -->
+        <section id="portfolio" class="py-24 px-6 bg-slate-900/30">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 text-white">Portfólio Selecionado</h2>
+                    <p class="text-slate-400 text-lg">Projetos reais que geram resultados reais.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Project 1 -->
+                    <div class="group relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 aspect-[4/3] cursor-pointer">
+                        <img src="https://placehold.co/600x450/1e293b/10b981?text=High+Ticket+Consulting" alt="Landing Page Consultoria" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80 group-hover:opacity-100">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-90"></div>
+                        <div class="absolute bottom-0 left-0 p-6">
+                            <div class="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">Captura de Leads</div>
+                            <h3 class="text-xl font-bold text-white">Consultoria High Ticket</h3>
+                        </div>
+                    </div>
+                    
+                    <!-- Project 2 -->
+                    <div class="group relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 aspect-[4/3] cursor-pointer">
+                        <img src="https://placehold.co/600x450/1e293b/06b6d4?text=SaaS+Dark+Mode" alt="Landing Page SaaS" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80 group-hover:opacity-100">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-90"></div>
+                        <div class="absolute bottom-0 left-0 p-6">
+                            <div class="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">Venda de Software</div>
+                            <h3 class="text-xl font-bold text-white">SaaS Financeiro B2B</h3>
+                        </div>
+                    </div>
+
+                    <!-- Project 3 -->
+                    <div class="group relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 aspect-[4/3] cursor-pointer">
+                        <img src="https://placehold.co/600x450/1e293b/a855f7?text=Infoproduto+Launch" alt="Landing Page Infoproduto" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80 group-hover:opacity-100">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-90"></div>
+                        <div class="absolute bottom-0 left-0 p-6">
+                            <div class="text-purple-400 text-xs font-bold uppercase tracking-wider mb-2">Lançamento</div>
+                            <h3 class="text-xl font-bold text-white">Curso de Investimentos</h3>
+                        </div>
+                    </div>
+
+                    <!-- Project 4 -->
+                    <div class="group relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 aspect-[4/3] cursor-pointer">
+                        <img src="https://placehold.co/600x450/1e293b/f59e0b?text=Local+Business" alt="Landing Page Negócio Local" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80 group-hover:opacity-100">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-90"></div>
+                        <div class="absolute bottom-0 left-0 p-6">
+                            <div class="text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">Negócio Local</div>
+                            <h3 class="text-xl font-bold text-white">Clínica de Estética</h3>
+                        </div>
+                    </div>
+
+                     <!-- Project 5 -->
+                     <div class="group relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 aspect-[4/3] cursor-pointer">
+                        <img src="https://placehold.co/600x450/1e293b/ec4899?text=App+Download" alt="Landing Page App" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80 group-hover:opacity-100">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-90"></div>
+                        <div class="absolute bottom-0 left-0 p-6">
+                            <div class="text-pink-400 text-xs font-bold uppercase tracking-wider mb-2">Mobile App</div>
+                            <h3 class="text-xl font-bold text-white">Delivery Fitness</h3>
+                        </div>
+                    </div>
+
+                     <!-- Project 6 -->
+                     <div class="group relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 aspect-[4/3] cursor-pointer">
+                        <img src="https://placehold.co/600x450/1e293b/3b82f6?text=Event+Registration" alt="Landing Page Evento" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80 group-hover:opacity-100">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-90"></div>
+                        <div class="absolute bottom-0 left-0 p-6">
+                            <div class="text-blue-400 text-xs font-bold uppercase tracking-wider mb-2">Evento Presencial</div>
+                            <h3 class="text-xl font-bold text-white">Imersão Empresarial</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services / Types of LPs -->
+        <section class="py-24 px-6" id="types">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 text-white">Formatos Que Convertem</h2>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 rounded-2xl hover:border-emerald-500/50">
+                        <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-500 mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Página de Vendas</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">Focada em venda direta. Copy longa, quebra de objeções, prova social e checkout integrado.</p>
+                        <ul class="text-sm text-slate-500 space-y-2">
+                            <li>• Para Infoprodutos</li>
+                            <li>• Para Serviços High-Ticket</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card p-8 rounded-2xl hover:border-cyan-500/50">
+                        <div class="w-12 h-12 bg-cyan-500/10 rounded-lg flex items-center justify-center text-cyan-500 mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Página de Captura</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">Focada em gerar leads. Oferta de isca digital, design limpo e formulário de alta conversão.</p>
+                        <ul class="text-sm text-slate-500 space-y-2">
+                            <li>• Para Lançamentos</li>
+                            <li>• Para Consultorias</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card p-8 rounded-2xl hover:border-purple-500/50">
+                        <div class="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-500 mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Página de Lançamento</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">Vídeo de vendas (VSL), delay de botão, urgência e escassez programadas.</p>
+                        <ul class="text-sm text-slate-500 space-y-2">
+                            <li>• CPLs e Webinários</li>
+                            <li>• Ofertas Relâmpago</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section class="py-24 px-6 text-center relative overflow-hidden bg-gradient-to-t from-emerald-900/10 to-transparent">
+            <div class="max-w-4xl mx-auto relative z-10">
+                <h2 class="text-4xl md:text-5xl font-bold mb-8 leading-tight text-white">
+                    Pare de Deixar Dinheiro na Mesa
+                </h2>
+                <p class="text-slate-300 text-lg mb-12 max-w-2xl mx-auto">
+                    Você está a um clique de ter uma estrutura profissional. Resposta em até <span class="text-emerald-400 font-bold">24 horas úteis</span>.
+                </p>
+                
+                <a href="https://wa.me/5527999610392?text=Olá, quero um orçamento para minha Landing Page." 
+                   target="_blank"
+                   class="inline-flex items-center justify-center gap-3 bg-white text-slate-950 px-10 py-5 rounded-full font-bold text-xl hover:bg-emerald-50 transition-all hover:scale-105 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Falar no WhatsApp Agora
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 pt-16 pb-8 px-6 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-10 mb-12">
+                <div class="max-w-xs">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 flex items-center justify-center bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-md">
+                            <span class="font-bold text-slate-950 text-lg font-display">A</span>
+                        </div>
+                        <span class="font-bold text-xl text-white font-display">ALTMAKERS</span>
+                    </div>
+                    <p class="text-slate-500 text-sm leading-relaxed">
+                        Especialistas em conversão digital. Transformamos tráfego em lucro através de design, copy e tecnologia.
+                    </p>
+                </div>
+                
+                <div class="flex flex-col gap-4">
+                    <h4 class="text-white font-semibold">Serviços</h4>
+                    <a href="#" class="text-slate-400 hover:text-emerald-400 text-sm transition-colors">Landing Pages</a>
+                    <a href="#" class="text-slate-400 hover:text-emerald-400 text-sm transition-colors">Micro SaaS</a>
+                    <a href="#" class="text-slate-400 hover:text-emerald-400 text-sm transition-colors">Tracking & Dados</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <h4 class="text-white font-semibold">Contato</h4>
+                    <a href="mailto:atendimento@altmakers.com.br" class="text-slate-400 hover:text-emerald-400 text-sm transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        atendimento@altmakers.com.br
+                    </a>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600">
+                <p>&copy; 2024 Altmakers. Todos os direitos reservados.</p>
+                <p>Desenvolvido com tecnologia de ponta.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Background Animation Script (Network Effect) -->
+    <script>
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        const connectionDistance = 150;
+        const particleCount = 60;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.4)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Update and draw particles
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                // Connections
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < connectionDistance) {
+                        ctx.strokeStyle = `rgba(16, 185, 129, ${0.15 - (dist / connectionDistance) * 0.15})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+            resize();
+            initParticles();
+        });
+
+        resize();
+        initParticles();
+        animate();
+    </script>
+
+    <!-- UI Logic & AI Integration -->
+    <script type="module">
+        import { GoogleGenAI, Type } from "@google/genai";
+
+        // Mobile Menu Toggle
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Navbar Scroll Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('bg-slate-950/90', 'backdrop-blur-md', 'shadow-md', 'border-b', 'border-slate-800');
+                navbar.classList.remove('py-6');
+                navbar.classList.add('py-4');
+            } else {
+                navbar.classList.remove('bg-slate-950/90', 'backdrop-blur-md', 'shadow-md', 'border-b', 'border-slate-800', 'py-4');
+                navbar.classList.add('py-6');
+            }
+        });
+
+        // Gemini Logic
+        const geminiForm = document.getElementById('gemini-form');
+        const geminiBtn = document.getElementById('gemini-btn');
+        const btnText = document.getElementById('btn-text');
+        const loadingDiv = document.getElementById('ai-loading');
+        const resultsDiv = document.getElementById('ai-results');
+        
+        // IMPORTANT: In a production static site, you shouldn't expose API keys directly. 
+        // For this generated file demo, we assume the user will input it or we use a placeholder logic.
+        // If you host this, protect your key or use a backend proxy.
+        // For the sake of this file working as requested:
+        const API_KEY = ""; // <--- INSIRA SUA API KEY AQUI SE DESEJAR TESTAR LOCALMENTE
+
+        geminiForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const niche = document.getElementById('niche-input').value;
+            
+            // UI States
+            loadingDiv.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+            geminiBtn.disabled = true;
+            btnText.textContent = "Analisando...";
+
+            try {
+                let strategyData;
+
+                if (API_KEY) {
+                     // Real API Call if key is present
+                    const ai = new GoogleGenAI({ apiKey: API_KEY });
+                    const response = await ai.models.generateContent({
+                        model: "gemini-3-flash-preview",
+                        contents: `Atue como um estrategista de conversão sênior. O usuário tem um negócio no nicho: "${niche}".
+                        Gere uma estratégia de Landing Page curta e direta.
+                        Retorne um JSON com:
+                        - title: Um título (H1) persuasivo para a página.
+                        - description: Uma breve descrição de 2 linhas da estratégia (qual a isca ou ângulo de venda).
+                        - conversionRate: Uma estimativa realista de conversão (ex: "15% a 25%").`,
+                        config: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    title: { type: Type.STRING },
+                                    description: { type: Type.STRING },
+                                    conversionRate: { type: Type.STRING }
+                                }
+                            }
+                        }
+                    });
+                    strategyData = JSON.parse(response.text);
+                } else {
+                    // Simulation Mode (since key might not be in the file)
+                    await new Promise(r => setTimeout(r, 2000)); // Fake delay
+                    const titles = [
+                        `Domine o mercado de ${niche} com Método Exclusivo`,
+                        `A Solução Definitiva para ${niche}`,
+                        `Estratégia Premium para ${niche}`
+                    ];
+                    strategyData = {
+                        title: titles[Math.floor(Math.random() * titles.length)],
+                        description: `Para o nicho de ${niche}, recomendamos uma página de Vendas Direta com forte prova social e garantia incondicional. Foque na dor específica do cliente e apresente sua solução como o único veículo possível.`,
+                        conversionRate: Math.floor(Math.random() * (35 - 12) + 12) + "% a " + Math.floor(Math.random() * (60 - 40) + 40) + "%"
+                    };
+                }
+
+                // Render Results
+                document.getElementById('result-title').textContent = strategyData.title;
+                document.getElementById('result-desc').textContent = strategyData.description;
+                document.getElementById('result-rate').textContent = strategyData.conversionRate;
+                
+                resultsDiv.classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                alert("Ocorreu um erro ao gerar a estratégia. Verifique a console ou a chave API.");
+            } finally {
+                loadingDiv.classList.add('hidden');
+                geminiBtn.disabled = false;
+                btnText.textContent = "Gerar Nova Estratégia";
+            }
+        });
+    </script>
+</body>
+</html>

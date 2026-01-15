@@ -11,9 +11,6 @@ export const Logo: React.FC<{ className?: string }> = ({ className = "h-8 w-auto
         <span className="font-bold text-xl tracking-tight text-white leading-none font-display">
           ALTMAKERS
         </span>
-        <span className="text-[10px] text-emerald-400 tracking-[0.2em] font-medium uppercase">
-          Studio Digital
-        </span>
       </div>
     </div>
   );
